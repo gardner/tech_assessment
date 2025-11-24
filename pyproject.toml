@@ -1,0 +1,100 @@
+[project]
+name = "bickford"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "altair>=5.5.0",
+    "arize-phoenix-otel>=0.13.1",
+    "chromadb>=1.3.4",
+    "click>=8.3.0",
+    "fast-flights>=2.2",
+    "fastapi==0.121.2",
+    "llama-index-core>=0.14.0",
+    "llama-index-embeddings-text-embeddings-inference>=0.4.2",
+    "llama-index-llms-openai-like>=0.5.3",
+    "llama-index-postprocessor-cohere-rerank>=0.5.1",
+    "llama-index-retrievers-bm25>=0.6.5",
+    "llama-index-vector-stores-chroma>=0.5.3",
+    "llama-index>=0.14.8",
+    "nest-asyncio>=1.6.0",
+    "openai>=2.8.0",
+    "openinference-instrumentation-openai>=0.1.40",
+    "openinference-instrumentation-smolagents>=0.1.19",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.38.0",
+    "opentelemetry-sdk>=1.38.0",
+    "pandas>=2.2.3",
+    "pymupdf-layout>=1.26.6",
+    "pymupdf4llm>=0.2.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest>=9.0.1",
+    "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
+    "smolagents[toolkit,telemetry]>=1.23.0",
+    "streamlit>=1.51.0",
+    "tiktoken>=0.12.0",
+    "watchdog>=6.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+chat = "bickford.chat:main"
+convert = "bickford.rag.convert:main"
+ingest = "bickford.rag.naive.ingest:main"
+rag = "bickford.rag.naive.query:main"
+ingestbm25 = "bickford.rag.bm25.ingest:main"
+rag25 = "bickford.rag.bm25.query:main"
+
+code_agent = "bickford.code_agent.code_agent:main"
+travel_agent = "bickford.travel.agent:main"
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["src/bickford"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/conftest.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.1",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+]
