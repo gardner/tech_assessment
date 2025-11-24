@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+
+# Configuration for top-5 retrieval accuracy evaluation
+# This uses the top-k.py provider which returns just the retrieved file names
+# The CSV file uses __expected column with "contains: filename" format
+# Promptfoo automatically parses and applies the contains assertion
+
+description: "Top-5 Retrieval Accuracy Evaluation"
+
+outputPath: evaluations/latest_results.html
+
+prompts:
+  - '{{ input }}'
+
+providers:
+  - file://src/bickford/rag/naive/top_k.py
+  - file://src/bickford/rag/bm25/top_k.py
+
+tests: file://tests/top-k.csv
