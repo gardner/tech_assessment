@@ -1,0 +1,79 @@
+x-app-base: &app-base
+  image: bickford-app:latest
+  env_file: .env
+  volumes:
+    - ./workspace:/workspace
+    - ./:/app
+
+services:
+  ingest:
+    <<: *app-base
+    build: .
+    restart: "no"
+    command: bash -c "uv run ingest && uv run ingestbm25"
+
+  evaluate:
+    <<: *app-base
+    restart: "no"
+    command: ./eval.sh
+
+  dashboard:
+    <<: *app-base
+    restart: "unless-stopped"
+    ports:
+      - "31337:31337"
+    command: uv run streamlit run --server.address 0.0.0.0 --server.port 31337 src/bickford/dashboard/app.py
+
+  bickford:
+    <<: *app-base
+    restart: "no"
+    ports:
+      - "31337:31337"
+    depends_on:
+      phoenix:
+        condition: service_started
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - 6006:6006  # PHOENIX_PORT
+      - 4317:4317  # PHOENIX_GRPC_PORT
+    environment:
+      - PHOENIX_WORKING_DIR=/mnt/data
+    volumes:
+      - phoenix_data:/mnt/data
+    restart: "unless-stopped"
+
+  # This was run on a machine with a GPU on my local network
+  # If you have a GPU or an x86 cpu then uncomment this to use it
+  # tei:
+  #   platform: linux/amd64
+  #   image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8 # Remove "cpu" if you have cuda
+  #   restart: "unless-stopped"
+  #   ports:
+  #     - "4242:80"
+  #   volumes:
+  #     - ./data:/data
+  #   command:
+  #     - --model-id
+  #     - Qwen/Qwen3-Embedding-0.6B
+  #     - --max-batch-tokens
+  #     - "32768"
+  #     - --max-batch-requests
+  #     - "16"
+  #     - --max-client-batch-size
+  #     - "16"
+  #     - --max-concurrent-requests
+  #     - "64"
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  phoenix_data:
+    driver: local
+
